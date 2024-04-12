@@ -2,7 +2,26 @@
 
 更新日期: 2024-04-12
 
-[TOC]
+* [API基本信息](#API-基本信息)
+* [HTTP返回代码](#HTTP-返回代码)
+* [接口错误代码](#接口错误代码)
+* [错误代码汇总](#错误代码汇总)
+* [鉴权说明](#鉴权说明)
+* [RESTFUL 接口](#RESTFUL-接口)
+	- [获取随机数](#获取随机数)
+	- [登陆](#登陆)
+	- [查询是否会员](#查询是否会员)
+	- [创建目录](#创建目录)
+	- [获取文件和目录](#获取文件和目录)
+	- [删除目录](#删除目录)
+	- [查询存储空间](#查询存储空间)
+	- [上传文件](#上传文件)
+	- [删除文件或目录](#删除文件或目录)
+  - [文件下载链接](#文件下载链接)
+  - [获取分享链接](#获取分享链接)
+  - [设置分享状态](#设置分享状态)
+* [上传文件的Demo(Javascript)](#上传文件的Demo(Javascript))
+
 
 ## API 基本信息
 
@@ -86,7 +105,7 @@ sign: 将`login_before`的接口返回的 code 参数,使用钱包的私钥进�
         }
     }
 
-### 查询是否VIP用户 
+### 查询是否会员
 
 > GET /api/v1/storage/get_vip_info
 
@@ -148,7 +167,7 @@ sign: 将`login_before`的接口返回的 code 参数,使用钱包的私钥进�
 }
 ```
 
-### 获取目录列表 
+### 获取文件和目录
 
 > GET /api/v1/storage/get_asset_group_list
 
@@ -175,10 +194,66 @@ sign: 将`login_before`的接口返回的 code 参数,使用钱包的私钥进�
     "data": {
         "list": [
             {
-                "AssetOverview": null,
+                "AssetOverview": {
+                    "AssetRecord": {
+                        "CID": "bafybeig2czmihhlyoo3x2erjaqb5cyief4jq6l565mht5lwfeeaaqsugwi",
+                        "Hash": "1220da1658839d7873b77d12290403d161042f130f2fbeeb0f3eaec52100084a86b2",
+                        "NeedEdgeReplica": 10,
+                        "TotalSize": 404893,
+                        "TotalBlocks": 3,
+                        "Expiration": "2024-09-09T16:25:53+08:00",
+                        "CreatedTime": "2024-04-12T16:25:53+08:00",
+                        "EndTime": "2024-04-12T16:28:28+08:00",
+                        "NeedCandidateReplicas": 1,
+                        "ServerID": "edeae7b0-2639-4a0e-b733-8d66325ccd17",
+                        "State": "EdgesFailed",
+                        "NeedBandwidth": 0,
+                        "Note": "",
+                        "Source": 2,
+                        "RetryCount": 1,
+                        "ReplenishReplicas": 0,
+                        "ReplicaInfos": [
+                            {
+                                "Hash": "1220da1658839d7873b77d12290403d161042f130f2fbeeb0f3eaec52100084a86b2",
+                                "NodeID": "c_9bf58a0b-6d83-43d3-923b-7398ff51cb88",
+                                "Status": 3,
+                                "IsCandidate": true,
+                                "EndTime": "2024-04-12T16:26:49+08:00",
+                                "DoneSize": 404893,
+                                "StartTime": "2024-04-12T16:25:53+08:00"
+                            },
+                            ....
+                            {
+                                "Hash": "1220da1658839d7873b77d12290403d161042f130f2fbeeb0f3eaec52100084a86b2",
+                                "NodeID": "e_9b338f3d-8c4a-45f1-857d-9dafc483cbd4",
+                                "Status": 3,
+                                "IsCandidate": false,
+                                "EndTime": "2024-04-12T16:28:22+08:00",
+                                "DoneSize": 404893,
+                                "StartTime": "2024-04-12T16:26:49+08:00"
+                            }
+                        ],
+                        "SPCount": 0
+                    },
+                    "UserAssetDetail": {
+                        "UserID": "0xe003b2fb03f3126347afdbba460ed39e57f9588d",
+                        "Hash": "1220da1658839d7873b77d12290403d161042f130f2fbeeb0f3eaec52100084a86b2",
+                        "AssetName": "aishop.png",
+                        "AssetType": "file",
+                        "ShareStatus": 0,
+                        "Expiration": "2024-09-09T16:25:53+08:00",
+                        "CreatedTime": "2024-04-12T16:25:53+08:00",
+                        "TotalSize": 405027,
+                        "Password": "",
+                        "GroupID": 0
+                    },
+                    "VisitCount": 0,
+                    "RemainVisitCount": 10,
+                    "FilcoinCount": 0
+                },,
                 "Group": {
                     "ID": 5,
-                    "UserID": "0xe003b2fb03f3126347afdbba460ed39e57f9588d",
+                    "UserID": "0xe003b2fb03f3126347afdbba460ed39Le57f9588d",
                     "Name": "test",
                     "Parent": 0,
                     "AssetCount": 0,
@@ -188,11 +263,42 @@ sign: 将`login_before`的接口返回的 code 参数,使用钱包的私钥进�
             }
         ],
         "total": 1
-    }
+    }gc
 }
 ```
 
 返回值说明:
+AssetRecord
+列表里有两种类型:
+
+- AssetOverview 文件
+    - AssetRecord 文件在titan网络中的相关信息
+        - CID: 文件CARID
+        - HASH: 文件 HASH
+        - NeedEdgeReplica: 分发到边缘节点(L2)的副本数量ID
+        - TotalSize: 文件大小
+        - TotalBlocks: 文件的区块数量
+        - NeedCandidateReplicas: 分发到候选节点(L1)的数量
+        - State: 状态信息
+        - ReplicaInfos: 副本的相关信息
+            - NodeID: 节点ID
+            - Status: 状态 0: 等待中 1: 下载中 2: 失败 3:成功
+            - IsCandidate: 是否候选节点
+            - DoneSize: 下载文件大小
+            - EndTime: 完成时间
+            - StartTime: 开始时间
+    - UserAssetDetail: 文件相关信息
+        - UserID:  用户ID
+        - Hash: 文件 HASH
+        - AssetName: 文件名称
+        - AssetType: 文件类型, file: 文件, folder 文件夹
+        - ShareStatus: 分享状态, 0: 未分享 1: 已分享
+        - TotalSize: 文件大小 
+        - Password: 设置的密码, 仅对加密文件
+        - GroupID: 所属目录ID
+    - VisitCount:       分享链接访问次数
+    - RemainVisitCount: 分享链接剩余访问次数
+    - FilcoinCount:  filecoin 备份的数量
 
 - Group 文件夹
     - ID:  目录ID
@@ -236,7 +342,7 @@ sign: 将`login_before`的接口返回的 code 参数,使用钱包的私钥进�
 }
 ```
 
-### 查询存储空间/可用存储空间
+### 查询存储空间
 
 > GET /api//api/v1/storage/get_linkv1/storage/get_storage_size
 
@@ -339,7 +445,7 @@ sign: 将`login_before`的接口返回的 code 参数,使用钱包的私钥进�
 }
 ```
 
-### 删除文件/文件夹
+### 删除文件或目录
 
 > GET /api/v1/storage/delete_asset
 
@@ -368,6 +474,42 @@ api/v1/storage/delete_asset?user_id=0xe003b2fb03f3126347afdbba460ed39e57f9588d&a
     }
 }
 ```
+
+## 文件下载链接
+
+> GET /api/v1/storage/share_asset
+
+**鉴权**
+
+参数：
+
+| 名称       | 类型     | 是否必须 | 描述                         |
+| -------- | ------ | ---- | -------------------------- |
+| user_id | STRING | YES  | 用户ID                        |
+| asset_cid | STRING | YES  | 文件CID                        |
+
+示例:
+
+/api/v1/storage/share_asset?user_id=0xe003b2fb03f3126347afdbba460ed39e57f9588d&asset_cid=bafkreig6bbd2abr2taznhsbgnbmgjwhqldhcxcpktgs7mgahz5lx2cgkpa
+
+响应:
+
+```
+{
+    "code": 0,
+    "data": {
+        "asset_cid": "bafkreig6bbd2abr2taznhsbgnbmgjwhqldhcxcpktgs7mgahz5lx2cgkpa",
+        "redirect": true,
+        "url": "https://9bf58a0b-6d83-43d3-923b-7398ff51cb88.test-l1.titannet.io:2345/ipfs/bafkreig6bbd2abr2taznhsbgnbmgjwhqldhcxcpktgs7mgahz5lx2cgkpa?token=xxxxNqT2jI\u0026filename=auth.go"
+    }
+}
+```
+
+返回值说明:
+- asset_cid: 文件的 CAR CID
+- url: 文件的链接, 可以直接访问
+
+**在url后面拼接&download=true ,返回二进制流格式**
 
 ### 获取分享链接
 
