@@ -69,7 +69,7 @@
 
 | 名称       | 类型     | 是否必须 | 描述  |
 | -------- | ------ | ---- | --- |
-| address | STRING | YES  | 钱包地址 |
+| username | STRING | YES  | 钱包地址 |
 | sign | STRING | YES  | 签名  |
 
 sign: 将`login_before`的接口返回的 code 参数,使用钱包的私钥进行签名
