@@ -15,7 +15,8 @@
 	- [获取文件和目录](#获取文件和目录)
 	- [删除目录](#删除目录)
 	- [查询存储空间](#查询存储空间)
-	- [上传文件](#上传文件)
+	- [上传原文件](#上传原文件)
+	- [上传CAR文件](#上传CAR文件)
 	- [删除文件或目录](#删除文件或目录)
   - [文件下载链接](#文件下载链接)
   - [获取分享链接](#获取分享链接)
@@ -377,14 +378,122 @@ AssetRecord
 -  TotalSize: 总可用存储空间
 -  UsedSize:  已用存储空间
 
-### 上传文件
+### 上传原文件  
+
+文件上传流程包含以下三个主要步骤：
+  1. 获取上传配置
+  2. 执行文件上传
+  3. 创建资源记录
+
+
+**1. 获取上传配置** 
+
+> GET /api/v1/storage/get_upload_info
+
+鉴权： 需要用户验证。
+
+请求参数： 无
+
+成功响应示例：
+
+```
+{
+    "code": 0,
+    "data": {
+        "UploadURL": "https://32d71de6-453a-4050-a41f-bfc7587a7500.test.titannet.io:2345/uploadv2",
+        "Token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJBbGxvdyI6WyJ1c2VyIl0sIklEIjoiNzU5MDUxODczQHFxLmNvbSIsIk5vZGVJRCI6IiIsIkV4dGVuZCI6IiIsIkFjY2Vzc0NvbnRyb2xMaXN0IjpudWxsfQ.x-32tjLnbCr0Q6xGLTVXiv7LJchMRXIYbupCn3djlo4",
+        "NodeID": "c_32d71de6-453a-4050-a41f-bfc7587a7500",
+        "AlreadyExists": false
+    }
+}
+```
+
+返回值说明:
+- UploadURL: 用于上传的URL地址。
+- Token: 访问授权令牌。
+
+
+**2. 上传文件**
+
+在获取上传配置后，使用获得的UploadURL进行文件上传。
+
+> POST https://xxx.test-l1.titannet.io:2345/upload
+
+请求头： 必须包含Authorization: Bearer {Token}以进行身份验证。
+
+请求参数：
+
+| 名称       | 类型     | 是否必须 | 描述                         |
+| -------- | ------ | ---- | -------------------------- |
+| file | binary | YES  | 要上传的文件内容                      |
+
+示例:
+
+```
+curl -XPOST -H'Content-Type: multipart/form-data' -H "Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJBbGxvdyI6WyJ1c2VyIl0sIklEIjoiNzU5MDUxODczQHFxLmNvbSIsIk5vZGVJRCI6IiIsIkV4dGVuZCI6IiIsIkFjY2Vzc0NvbnRyb2xMaXN0IjpudWxsfQ.x-32tjLnbCr0Q6xGLTVXiv7LJchMRXIYbupCn3djlo4" -F"file=@/home/gnasnik/gopath/src/flutter-call-workerd.zip" https://32d71de6-453a-4050-a41f-bfc7587a7500.test.titannet.io:2345/uploadv2
+```
+
+成功响应示例：
+
+```
+{"code":0,"err":0,"msg":"","cid":"bafkreiehumdua2ptr5udzlib3w7g7x6jbq7wewmv2qlqgfiaye5rucoyqq"}
+```
+
+字段说明：
+
+cid: 文件的唯一标识符。
+
+
+**3. 创建资源** 
+
+在文件上传成功后，使用文件的唯一标识符（CID）来创建资源记录。
+
+> GET /api/v1/storage/create_asset
+
+鉴权： 需要用户验证。
+
+请求参数：
+
+| 名称       | 类型     | 是否必须 | 描述                         |
+| -------- | ------ | ---- | -------------------------- |
+| user_id | STRING | YES  | 用户名                      |
+| asset_cid | STRING | YES  | 文件CID                   |
+| asset_name | STRING | YES  | 文件名称                 |
+| asset_size | INT | YES  |     文件大小                |
+| group_id | INT | YES  | 上传的文件夹目录ID            |
+| asset_type |STRING | YES  | 类型（例如：file 或 folder） |                            
+
+
+示例:
+
+/api/v1/storage/create_asset?user_id=0xe003b2fb03f3126347afdbba460ed39e57f9588d&asset_cid=bafybeih4kcycijywcmnnfdz2e7cyxrfwjnkb2ddlhyiqs3c4un7efg6atm&asset_name=1702690533062.png&lang=cn&asset_size=267370&group_id=7&asset_type=file
+
+成功响应示例：
+
+```
+{
+    "code": 0,
+    "data": {
+        "CandidateAddr": "https://9bf58a0b-6d83-43d3-923b-7398ff51cb88.test-l1.titannet.io:2345/upload",
+        "Token": "xxx"
+    }
+}
+```
+
+字段说明：
+
+CandidateAddr: 资源可用的地址。
+Token: 访问授权令牌。
+
+
+### 上传CAR文件
 
 上传文件分为两步:
- - 1. 获取上传文件节点配置
+ - 1. 创建资源
  - 2. 上传文件
 
 
-**1. 获取上传文件节点配置** 
+**1. 创建资源** 
 
 > GET /api/v1/storage/create_asset
 
@@ -399,7 +508,7 @@ AssetRecord
 | asset_name | STRING | YES  | 文件名称                 |
 | asset_size | INT | YES  |     文件大小                |
 | group_id | INT | YES  | 上传的文件夹目录ID            |
-| asset_type |STRING | YES  | 类型: file: 文件, folder: 文件夹 |                            
+| asset_type |STRING | YES  | 类型（例如：file 或 folder） |                            
 
 
 示例:
