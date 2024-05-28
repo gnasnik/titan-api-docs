@@ -462,7 +462,7 @@ cid: 文件的唯一标识符。
 | asset_size | INT | YES  |     文件大小                |
 | group_id | INT | YES  | 上传的文件夹目录ID            |
 | asset_type |STRING | YES  | 类型（例如：file 或 folder） |                            
-
+| node_id |STRING | YES  | 上传的节点id |   
 
 示例:
 
